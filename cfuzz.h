@@ -5,9 +5,12 @@
 typedef struct {
 	u_char id;
 	u_char len;
+    int len_data;
 	u_char *data;
 } infoElem;
 
+//the int len_* fields are only used for copying the data to a packet,
+//so no fuzzing on those fields! Fuzzing should only be done on u_char datatypes
 
 //Probe response frame
 typedef struct {
