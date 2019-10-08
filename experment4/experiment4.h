@@ -1,6 +1,9 @@
 #ifndef CFUZZ_H_
 #define CFUZZ_H_
 
+//the int len_* fields are only used for copying the data to a packet,
+//so no fuzzing on those fields! Fuzzing should only be done on u_char datatypes
+
 //Information element
 typedef struct {
 	u_char id;
@@ -8,9 +11,6 @@ typedef struct {
     int len_data;
 	u_char *data;
 } infoElem;
-
-//the int len_* fields are only used for copying the data to a packet,
-//so no fuzzing on those fields! Fuzzing should only be done on u_char datatypes
 
 //Probe response frame
 typedef struct {
@@ -55,7 +55,7 @@ typedef struct {
 
 } probeResponse;
 
-//Authentication response frame
+//Authentication frame
 typedef struct {
     int len_radioTapHdr; 	//usually 32 bytes
     u_char *radioTapHdr;
@@ -138,12 +138,5 @@ typedef struct {
     u_char *fsc;
 
 } assResponse;
-
-
-
-
-
-
-
 
 #endif
