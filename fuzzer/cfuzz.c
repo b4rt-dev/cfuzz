@@ -6,7 +6,7 @@
 #include "cfuzz.h"
 #include <sys/time.h>
 
-#define DEBUG (0)
+#define DEBUG (1)
 
 //Used for timing
 struct timeval tm1;
@@ -18,7 +18,7 @@ unsigned long fuzzStep      = 0;
 //Number of acked frames in current step
 int ackedFrames             = 0;
 
-//Copied from wireshark. Will be overwritten by firmware
+//Copied from Wireshark
 u_char radioTapHeader[36]   =   "\x00\x00\x24\x00\x2f\x40\x00\xa0\x20\x08\x00\x00\x00\x00\x00\x00" \
                                 "\x9d\x5c\xa0\x15\x01\x00\x00\x00\x10\x02\x6c\x09\xa0\x00\xa7\x00" \
                                 "\x00\x00\xa7\x00";
@@ -34,15 +34,17 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 - xx:xx:xx:xx:xx:xx Chromecast 1
 - ec:9b:f3:1e:19:71 Samsung Galaxy S6
 - cc:fa:00:c9:fc:ad LG Optimus G
+- 12:42:2a:7e:d4:e8 Orange Pi Zero
 */
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
 u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
+//u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 
 //Returns filter for libpcap
 //we want to use as many filters here as possible, since libpcap is closer to the hardware than this user-level program
-//we only want to receive Probe requests, Authentication frames and Association requests, all to only our own MAC address or broadcast address
+//we only want to receive Probe requests, Authentication frames and Association requests, all to only our own MAC address or broadcast address in case of Probe requests
 //furthermore, all frames except ACK frames (have no send address) should be sent from the SUT MAC address
 //also, it is important not to compile and set the filter between each pcap_next. Otherwise ACK frames will be missed
 //when changing the filterString, the strncpy() locations should also be changed!
@@ -703,13 +705,13 @@ int main(int argc, char *argv[])
     //flag to indicate if we have to listen for ACK verification
     int waitForACK = 0;
 
+    //counter for continuous ACK fail
     int noACKcounter = 0;
 
     //infinite listen-respond loop
     while (1)
     {
         //receive packet
-        startTimer();
         const u_char *packet = pcap_next(pcap_h, &header);
 
         unsigned long long timeSincePrevPacket = stopTimer();
@@ -725,41 +727,56 @@ int main(int argc, char *argv[])
         //if we had to wait for an ACK, verify if current frame is an ACK
         if (waitForACK != 0)
         {
-            if (frameType == 0xd4)
+            if (stopTimer() <= 10)
             {
-                ackedFrames = ackedFrames + 1;  //the frame is acked, so increase counter
-                noACKcounter = 0;
-                increaseFuzzer();               //fuzz next thing
-                printf("Frame ACKed, fuzzStep is now %lu\n", fuzzStep);
-                if (DEBUG)
+                if (frameType == 0xd4)
                 {
-                    switch (waitForACK)
+                    if (DEBUG)
                     {
-                        case 1:
+                        switch (waitForACK)
                         {
-                            printf("Association response ACKed\n");
-                            break;
-                        }
-                        case 2:
-                        {
-                            printf("Authentication frame ACKed\n");
-                            break;
-                        }
-                        case 3:
-                        {
-                            printf("Probe response ACKed\n");
-                            break;
-                        }
-                        default:
-                        {
-                            printf("Frame ACKed\n");
-                            break;
+                            case 1:
+                            {
+                                printf("Association response ACKed\n");
+                                break;
+                            }
+                            case 2:
+                            {
+                                printf("Authentication frame ACKed\n");
+                                break;
+                            }
+                            case 3:
+                            {
+                                printf("Probe response ACKed\n");
+                                break;
+                            }
+                            default:
+                            {
+                                printf("Frame ACKed\n");
+                                break;
+                            }
                         }
                     }
+                    ackedFrames = ackedFrames + 1;  //the frame is acked, so increase counter
+                    waitForACK = 0;                 //we should stop waiting for ack and move on
+                    noACKcounter = 0;               //reset counter
+
+                    increaseFuzzer();               //fuzz next thing
+                    if (DEBUG)
+                    {
+                        printf("Frame ACKed, fuzzStep is now %lu\n", fuzzStep);
+                    }
+                    
                 }
-                
+                else //received other frame. Ignore and keep listening
+                {
+                    if (DEBUG)
+                    {
+                        printf("Got other frame. Will be ignored\n");   
+                    }
+                }    
             }
-            else
+            else //waited more than 10 ms for ack. failed
             {
                 noACKcounter = noACKcounter + 1;
                 if (noACKcounter == 10)
@@ -772,8 +789,8 @@ int main(int argc, char *argv[])
                 {
                     printf("Not sure if frame was ACKed\n");
                 }
+                waitForACK = 0;
             }
-            waitForACK = 0;
         }
         else //Process frame depending on type
         {
@@ -783,18 +800,21 @@ int main(int argc, char *argv[])
                 {
                     sendProbeResponse(pcap_h, sourceAddr);
                     waitForACK = 3;
+                    startTimer();
                     break;
                 } 
                 case 0xb0:
                 {
                     //sendAuthResponse(pcap_h, sourceAddr);
                     //waitForACK = 2;
+                    //startTimer();
                     break;
                 }
                 case 0x00:
                 {
                     //sendAssResponse(pcap_h, sourceAddr);
                     //waitForACK = 1;
+                    //startTimer();
                     break;
                 }
                 case 0xd4:
