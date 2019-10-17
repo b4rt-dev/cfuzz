@@ -303,12 +303,12 @@ int sendPacket(pcap_t *pcap_h, u_char *packet, int size)
     return sendStatus;
 }
 
-//Creates Authentication frame and sends it
-int sendAuthResponse(pcap_t *pcap_h, u_char *dstAddress)
+//Creates Authentication frame
+u_char *sendAuthResponse(u_char *dstAddress, int *packetSize)
 {
     //fill in struct
     authResponse authResp = { 
-        36, radioTapHeader,                //RadioTap hdr   (overwritten by firmware)
+        36, radioTapHeader,                //RadioTap hdr
         1, "\xb0",                         //Type
         1, "\x00",                         //Subtype
         2, "\x3a\x01",                     //Duration
@@ -323,7 +323,7 @@ int sendAuthResponse(pcap_t *pcap_h, u_char *dstAddress)
     };
 
     //calculate size of final packet
-    int packetSize = authResp.len_radioTapHdr 
+    *packetSize = authResp.len_radioTapHdr 
                 + authResp.len_type
                 + authResp.len_flags
                 + authResp.len_duration
@@ -337,8 +337,12 @@ int sendAuthResponse(pcap_t *pcap_h, u_char *dstAddress)
                 + authResp.len_fsc;
 
     //define packet
-    u_char authRespPacket[packetSize];
-
+    u_char *authRespPacket = malloc(*packetSize);
+    if(!authRespPacket)
+    {
+        printf("Memory allocation error!\n");
+        exit(-1);
+    }
 
     //copy all struct fields into packet
     int copyOffset = 0;
@@ -381,11 +385,11 @@ int sendAuthResponse(pcap_t *pcap_h, u_char *dstAddress)
 
 
     //send packet
-    return sendPacket(pcap_h, authRespPacket, packetSize);
+    return authRespPacket;
 }
 
-//Creates Association response frame and sends it
-int sendAssResponse(pcap_t *pcap_h, u_char *dstAddress)
+//Creates Association response
+u_char *sendAssResponse(u_char *dstAddress, int *packetSize)
 {
     #define numberOfAssInfoElems (1)   //number of information elements
 
@@ -412,7 +416,7 @@ int sendAssResponse(pcap_t *pcap_h, u_char *dstAddress)
 
     //fill in struct
     assResponse assResp = { 
-        36, radioTapHeader,                //RadioTap hdr   (overwritten by firmware)
+        36, radioTapHeader,                //RadioTap hdr
         1, "\x10",                         //Type
         1, "\x00",                         //Flags
         2, "\x40\x01",                     //Duration
@@ -431,7 +435,7 @@ int sendAssResponse(pcap_t *pcap_h, u_char *dstAddress)
     };
 
     //calculate size of final packet
-    int packetSize = assResp.len_radioTapHdr 
+    *packetSize = assResp.len_radioTapHdr 
                 + assResp.len_type
                 + assResp.len_flags
                 + assResp.len_duration
@@ -446,7 +450,12 @@ int sendAssResponse(pcap_t *pcap_h, u_char *dstAddress)
                 + assResp.len_fsc;
 
     //define packet
-    u_char assRespPacket[packetSize];
+    u_char *assRespPacket = malloc(*packetSize);
+    if(!assRespPacket)
+    {
+        printf("Memory allocation error!\n");
+        exit(-1);
+    }
 
     //copy all struct fields into packet
     int copyOffset = 0;
@@ -502,11 +511,11 @@ int sendAssResponse(pcap_t *pcap_h, u_char *dstAddress)
     copyOffset = copyOffset + assResp.len_fsc;
 
     //send packet
-    return sendPacket(pcap_h, assRespPacket, packetSize);    
+    return assRespPacket;    
 }
 
-//Creates Probe response frame and sends it
-int sendProbeResponse(pcap_t *pcap_h, u_char *dstAddress)
+//Creates Probe response frame
+u_char *getProbeResponse(u_char *dstAddress, int *packetSize)
 {
     #define numberOfProbeInfoElems (3)   //number of information elements
 
@@ -547,7 +556,7 @@ int sendProbeResponse(pcap_t *pcap_h, u_char *dstAddress)
 
     //fill in struct
     probeResponse probeResp = { 
-        36, radioTapHeader,                //RadioTap hdr   (overwritten by firmware)
+        36, radioTapHeader,                //RadioTap hdr
         1, "\x50",                         //Type
         1, "\x00",                         //Flags
         2, "\x3a\x01",                     //Duration
@@ -565,9 +574,8 @@ int sendProbeResponse(pcap_t *pcap_h, u_char *dstAddress)
         4, "\x00\x00\x00\x00"              //FSC            (overwritten by firmware)
     };
 
-
     //calculate size of final packet
-    int packetSize = probeResp.len_radioTapHdr 
+    *packetSize = probeResp.len_radioTapHdr 
                 + probeResp.len_type
                 + probeResp.len_flags
                 + probeResp.len_duration
@@ -580,10 +588,14 @@ int sendProbeResponse(pcap_t *pcap_h, u_char *dstAddress)
                 + probeResp.len_capabInfo
                 + probeResp.len_taggedParams
                 + probeResp.len_fsc;
-
     
     //define packet
-    u_char probeRespPacket[packetSize];
+    u_char *probeRespPacket = malloc(*packetSize);
+    if(!probeRespPacket)
+    {
+        printf("Memory allocation error!\n");
+        exit(-1);
+    }
 
     //copy all struct fields into packet
     int copyOffset = 0;
@@ -638,8 +650,8 @@ int sendProbeResponse(pcap_t *pcap_h, u_char *dstAddress)
     memcpy(probeRespPacket + copyOffset, probeResp.fsc, probeResp.len_fsc);
     copyOffset = copyOffset + probeResp.len_fsc;
 
-    //send packet
-    return sendPacket(pcap_h, probeRespPacket, packetSize);    
+    //return packet
+    return probeRespPacket;    
 }
 
 
@@ -798,21 +810,30 @@ int main(int argc, char *argv[])
             {
                 case 0x40:
                 {
-                    sendProbeResponse(pcap_h, sourceAddr);
+                    int packetSize;
+                    u_char *packet = getProbeResponse(sourceAddr, &packetSize);
+                    sendPacket(pcap_h, packet, packetSize);
+                    free(packet);      //free allocated memory
                     waitForACK = 3;
                     startTimer();
                     break;
                 } 
                 case 0xb0:
                 {
-                    //sendAuthResponse(pcap_h, sourceAddr);
+                    //int packetSize;
+                    //u_char *packet = sendAuthResponse(sourceAddr, &packetSize);
+                    //sendPacket(pcap_h, packet, packetSize);
+                    //free(packet);      //free allocated memory
                     //waitForACK = 2;
                     //startTimer();
                     break;
                 }
                 case 0x00:
                 {
-                    //sendAssResponse(pcap_h, sourceAddr);
+                    //int packetSize;
+                    //u_char *packet = sendAssResponse(sourceAddr, &packetSize);
+                    //sendPacket(pcap_h, packet, packetSize);
+                    //free(packet);      //free allocated memory
                     //waitForACK = 1;
                     //startTimer();
                     break;
