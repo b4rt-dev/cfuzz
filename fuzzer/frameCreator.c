@@ -8,6 +8,7 @@ Creates frames.
 #include "frameCreator.h"
 #include "fuzzer.h"
 #include "frameDefinitions.h"
+#include "fuzzSSID.h"
 
 //Creates Authentication frame
 u_char *createAuthResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
@@ -227,15 +228,13 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
 
     //definition of all info elements
 
-    infoElem ssid = {
+    /*infoElem ssid = {
         0,         //id
         8,         //len
         8,         //real length of data
         "\x43\x43\x43\x43\x43\x43\x43\x43" //data
-    };
-    //infoElem ssid = ssidFuzz();
-
-    printf("fuzzStep from frameCreator is now %d\n", getFuzzStep());
+    };*/
+    infoElem ssid = ssidFuzz();
 
     infoElem suppRates = {
         1,         //id
