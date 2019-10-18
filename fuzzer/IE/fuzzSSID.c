@@ -1,5 +1,5 @@
 /*
-Manages what to fuzz when.
+Fuzzes SSID Information element
 
 TODO
 - free after malloc

@@ -1,8 +1,5 @@
 /*
 Manages what to fuzz when.
-
-TODO
-- free after malloc
 */
 #include <stdio.h>
 #include <stdlib.h>
