@@ -1,10 +1,13 @@
+/*
+Creates frames.
+*/
 #include <stdio.h>
-#include <pcap.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-#include <sys/time.h>
 #include "frameCreator.h"
+#include "fuzzer.h"
+#include "frameDefinitions.h"
 
 //Creates Authentication frame
 u_char *createAuthResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
@@ -231,6 +234,8 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
         "\x43\x43\x43\x43\x43\x43\x43\x43" //data
     };
     //infoElem ssid = ssidFuzz();
+
+    printf("fuzzStep from frameCreator is now %d\n", getFuzzStep());
 
     infoElem suppRates = {
         1,         //id

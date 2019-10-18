@@ -1,3 +1,6 @@
+/*
+This is the main file. It handles sending, receiving, but also monitoring of frames.
+*/
 #include <stdio.h>
 #include <pcap.h>
 #include <stdlib.h>
@@ -6,15 +9,13 @@
 #include <sys/time.h>
 #include "cfuzz.h"
 #include "frameCreator.h"
+#include "frameDefinitions.h"
+#include "fuzzer.h"
 
 #define DEBUG (1)
 
 //Used for timing
 struct timeval tm1;
-
-//Current (initial) state and step of the fuzzer
-unsigned long fuzzState     = 0;
-unsigned long fuzzStep      = 0;
 
 //Number of acked frames in current step
 int ackedFrames             = 0;
@@ -93,154 +94,6 @@ unsigned long long stopTimer()
     return t;
 }
 
-int states[] = {0,1,2,3};
-int steps[] = {45,45,16,256};
-
-//Controls state of fuzzer, and therefore what to fuzz next
-void increaseFuzzer()
-{
-    if (fuzzState >= 4)
-    {
-        printf("Done with Fuzzing\n");
-        exit(0);
-    }
-    else
-    {
-        if (fuzzStep == 0)
-        {
-            switch (fuzzState)
-            {
-                case 0: 
-                {
-                    printf("Fuzzing SSID incorrect length with data\n");
-                    break;
-                }
-                case 1: 
-                {
-                    printf("Fuzzing SSID incorrect length without data\n");
-                    break;
-                }
-                case 2: 
-                {
-                    printf("Fuzzing SSID oversized length\n");
-                    break;
-                }
-                case 3: 
-                {
-                    printf("Fuzzing SSID characters\n");
-                    break;
-                }
-            }
-        }
-        if (fuzzStep < steps[fuzzState])
-            fuzzStep = fuzzStep + 1;
-        else
-        {
-            fuzzStep = 0;
-            fuzzState = fuzzState + 1;
-        }
-    }
-
-}
-
-//Returns an SSID information element
-infoElem ssidFuzz()
-{
-    infoElem ssid = {
-            0,         //id
-            4,         //len
-            4,         //real length of data
-            "\x46\x55\x5a\x5a" //data
-            };
-
-    switch (fuzzState)
-    {
-        case 0: //SSID incorrect length with data
-        {
-            if (fuzzStep <= 38)
-            {
-                ssid.id = 0;
-                ssid.len = fuzzStep;
-                ssid.len_data = 4;
-                ssid.data = "\x46\x55\x5a\x5a";
-            }
-            else
-            {
-                ssid.id = 0;
-                ssid.len = 255 - (fuzzStep - 39);
-                ssid.len_data = 4;
-                ssid.data = "\x46\x55\x5a\x5a";
-            }
-            break;
-        }
-        case 1: //SSID incorrect length without data
-        {
-            if (fuzzStep <= 38)
-            {
-                ssid.id = 0;
-                ssid.len = fuzzStep;
-                ssid.len_data = 0;
-                ssid.data = "";
-            }
-            else
-            {
-                ssid.id = 0;
-                ssid.len = 255 - (fuzzStep - 39);
-                ssid.len_data = 0;
-                ssid.data = "";
-            }
-            break;
-        }
-        case 2: //SSID oversized length
-        {
-            if (fuzzStep < 8)
-            {
-                int dataSize = 33 + fuzzStep;
-
-                ssid.id = 0;
-                ssid.len = dataSize;
-                ssid.len_data = dataSize;
-                //create data of datasize times 0x61
-                u_char *data = malloc(dataSize);
-                memset(data, 0x61, dataSize);
-                ssid.data = data;
-            }
-            else
-            {
-                int dataSize = 255 - fuzzStep;
-
-                ssid.id = 0;
-                ssid.len = dataSize;
-                ssid.len_data = dataSize;
-                //create data of datasize times 0x61
-                u_char *data = malloc(dataSize);
-                memset(data, 0x61, dataSize);
-                ssid.data = data;
-            }
-            break;
-        }
-        case 3:  //SSID characters
-        {
-            ssid.id = 0;
-            ssid.len = 32;
-            ssid.len_data = 32;
-            //create characters
-            u_char *data = malloc(32);
-            for (int i = 0; i < 32; i++)
-            {
-                data[i] = fuzzStep;
-            }
-            ssid.data = data;
-            break;
-        }
-
-        
-    }
-    
-
-    return ssid;
-}
-
 //Returns source address pointer location in packet
 u_char *getSourceAddrOfPacket(const u_char *packet)
 {
@@ -303,9 +156,6 @@ int sendPacket(pcap_t *pcap_h, u_char *packet, int size)
     
     return sendStatus;
 }
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -428,7 +278,7 @@ int main(int argc, char *argv[])
                     increaseFuzzer();               //fuzz next thing
                     if (DEBUG)
                     {
-                        printf("Frame ACKed, fuzzStep is now %lu\n", fuzzStep);
+                        printf("Frame ACKed, fuzzStep is now %d\n", getFuzzStep());
                     }
                     
                 }
@@ -445,7 +295,8 @@ int main(int argc, char *argv[])
                 noACKcounter = noACKcounter + 1;
                 if (noACKcounter == 10)
                 {
-                    printf("Frame not ACKed after 10 retries. State is %lu, step is %lu\n", fuzzState, fuzzStep);
+                    //printf("Frame not ACKed after 10 retries. State is %lu, step is %lu\n", fuzzState, fuzzStep);
+                    printf("Frame not ACKed after 10 retries\n");
                     noACKcounter = 0;
                     increaseFuzzer();
                 }
