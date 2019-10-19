@@ -12,7 +12,7 @@ This is the main file. It handles sending, receiving, but also monitoring of fra
 #include "frameDefinitions.h"
 #include "fuzzer.h"
 
-#define DEBUG (1)
+#define DEBUG (0)
 
 //Used for timing
 struct timeval tm1;
@@ -278,7 +278,8 @@ int main(int argc, char *argv[])
                     increaseFuzzer();               //fuzz next thing
                     if (DEBUG)
                     {
-                        printf("Frame ACKed, fuzzStep is now %d\n", getFuzzStep());
+                        //printf("Frame ACKed, fuzzStep is now %d\n", getFuzzStep());
+                        printf("Frame ACKed, fuzzstep unkown\n");
                     }
                     
                 }
@@ -295,8 +296,7 @@ int main(int argc, char *argv[])
                 noACKcounter = noACKcounter + 1;
                 if (noACKcounter == 10)
                 {
-                    //printf("Frame not ACKed after 10 retries. State is %lu, step is %lu\n", fuzzState, fuzzStep);
-                    printf("Frame not ACKed after 10 retries\n");
+                    printf("Frame not ACKed after 10 retries, moving on\n");
                     noACKcounter = 0;
                     increaseFuzzer();
                 }

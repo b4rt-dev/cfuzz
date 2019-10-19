@@ -6,69 +6,55 @@ Manages what to fuzz when.
 #include <stdint.h>
 #include <string.h>
 #include "frameDefinitions.h"
+#include "fuzzSSID.h"
 
-//Current (initial) state and step of the fuzzer
-unsigned long fuzzState     = 0;
-unsigned long fuzzStep      = 0;
+//Number of subfuzzers
+#define SUBFUZZERS (1)
 
-//Steps of fuzzers for each state
-int states[] = {0,1,2,3};
-int steps[] = {45,45,16,256};
+//Array of pointers to subfuzzers update functions
+int (*p[SUBFUZZERS]) (int i) = {ssidFuzzUpdate};
+
+//State of sub-fuzzer
+//-1 = Done
+//0  = In progress
+int subFuzzState = -1;
+
+//Current sub-fuzzer
+//Starts with -1 to prevent skipping the first sub-fuzzer
+int subFuzzerIdx = -1;
+
+//Flag to indicate if the done with all subfuzzers notification has been sent
+int notifyDone = 0;
 
 //Controls state of fuzzer, and therefore what to fuzz next
 void increaseFuzzer()
 {
-    if (fuzzState >= 4)
+    //while we still have sub-fuzzers to go
+    if (subFuzzerIdx < SUBFUZZERS)
     {
-        printf("Done with Fuzzing\n");
-        exit(0);
-    }
-    else
-    {
-        if (fuzzStep == 0)
+        if (subFuzzState == -1)
         {
-            switch (fuzzState) //These messages are only printed when a frame is received
+            subFuzzerIdx = subFuzzerIdx + 1;
+            if (subFuzzerIdx < SUBFUZZERS)
             {
-                case 0: 
-                {
-                    printf("Fuzzing SSID incorrect length with data\n");
-                    break;
-                }
-                case 1: 
-                {
-                    printf("Fuzzing SSID incorrect length without data\n");
-                    break;
-                }
-                case 2: 
-                {
-                    printf("Fuzzing SSID oversized length\n");
-                    break;
-                }
-                case 3: 
-                {
-                    printf("Fuzzing SSID characters\n");
-                    break;
-                }
+                subFuzzState = (*p[subFuzzerIdx]) (0);
             }
         }
-        if (fuzzStep < steps[fuzzState])
-            fuzzStep = fuzzStep + 1;
         else
         {
-            fuzzStep = 0;
-            fuzzState = fuzzState + 1;
+            subFuzzState = (*p[subFuzzerIdx]) (1);
         }
     }
-
+    //Done with all sub-fuzzers
+    else
+    {
+        //Only do first time
+        if (notifyDone == 0)
+        {
+            notifyDone = 1;
+            printf("Done with all subfuzzers\n");
+            //Optional exit
+            exit(1);
+        }
+    }
 }
-
-int getFuzzState()
-{
-    return fuzzState;
-}
-
-int getFuzzStep()
-{
-    return fuzzStep;
-}
-

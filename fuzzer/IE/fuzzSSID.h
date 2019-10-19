@@ -3,6 +3,8 @@
 
 #include "../frameDefinitions.h"
 
+int ssidFuzzUpdate(int status);
+
 infoElem ssidFuzz();
 
 #endif

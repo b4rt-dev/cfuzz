@@ -3,8 +3,4 @@
 
 void increaseFuzzer();
 
-int getFuzzState();
-
-int getFuzzStep();
-
 #endif
