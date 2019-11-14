@@ -8,12 +8,16 @@ Manages what to fuzz when.
 #include "frameDefinitions.h"
 #include "fuzzSSID.h"
 #include "fuzzRates.h"
+#include "fuzzFH.h"
+//CHANGE WHEN NEW SUBFUZZER
 
+//CHANGE WHEN NEW SUBFUZZER
 //Number of subfuzzers
-#define SUBFUZZERS (2)
+#define SUBFUZZERS (3)
 
+//CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {ratesFuzzUpdate, ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done

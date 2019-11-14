@@ -28,6 +28,7 @@ void ssidPrintCurrentState()
     {
         case 0: 
         {
+            printf("\e[33mFuzzing SSID IE\e[39m\n");
             printf("Fuzzing SSID incorrect length with data\n");
             break;
         }
@@ -53,7 +54,7 @@ void ssidPrintCurrentState()
         }
         case 5:
         {
-            printf("Done with fuzzing SSID\n");
+            printf("\e[33mDone with fuzzing SSID IE\e[39m\n");
             break;
         }
     }
@@ -178,7 +179,7 @@ infoElem ssidFuzz()
                 }
                 else
                 {
-                    int dataSize = 255 - fuzzStep;
+                    int dataSize = 255 - fuzzStep + 8;
 
                     ssid.id = 0;
                     ssid.len = dataSize;

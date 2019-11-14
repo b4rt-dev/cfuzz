@@ -10,6 +10,9 @@ Creates frames.
 #include "frameDefinitions.h"
 #include "fuzzSSID.h"
 #include "fuzzRates.h"
+#include "fuzzFH.h"
+//CHANGE WHEN NEW SUBFUZZER
+
 
 //Creates Authentication frame
 u_char *createAuthResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
@@ -231,13 +234,16 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
 //Creates Probe response frame
 u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
 {
-    #define numberOfProbeInfoElems (3)   //number of information elements
+    //CHANGE WHEN NEW SUBFUZZER
+    #define numberOfProbeInfoElems (4)   //number of information elements
 
     //definition of all info elements
 
     infoElem ssid = ssidFuzz();
 
     infoElem suppRates = ratesFuzz();
+
+    infoElem fh = fhFuzz();
 
     infoElem dsParam = {
         3,         //id
@@ -246,8 +252,12 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
         "\x01" //data
     };
 
+    //CHANGE WHEN NEW SUBFUZZER
+
+
+    //CHANGE WHEN NEW SUBFUZZER
     //create array of information elements
-    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, dsParam};
+    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, dsParam};
 
     //length of all info elements, including id and len field
     int len_taggedParams = 0;

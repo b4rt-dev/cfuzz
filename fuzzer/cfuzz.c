@@ -13,9 +13,11 @@ This is the main file. It handles sending, receiving, but also monitoring of fra
 #include "fuzzer.h"
 
 #define DEBUG (0)
+#define SUTTIMEOUTMS (30000) //30s
 
 //Used for timing
 struct timeval tm1;
+struct timeval longtm;
 
 //Number of acked frames in current step
 int ackedFrames             = 0;
@@ -91,6 +93,24 @@ unsigned long long stopTimer()
     gettimeofday(&tm2, NULL);
 
     unsigned long long t = 1000 * (tm2.tv_sec - tm1.tv_sec) + (tm2.tv_usec - tm1.tv_usec) / 1000;
+    return t;
+}
+
+//Starts timer by setting current (starting) time to longtm
+//Longtimer is used to determine if it was more than X seconds since the SUT sent out frames
+void startLongTimer()
+{
+    gettimeofday(&longtm, NULL);
+}
+
+//Stops timer by setting current (ending) time to longtm2
+//Then compares difference in time and returns it in milliseconds
+unsigned long long stopLongTimer()
+{
+    struct timeval longtm2;
+    gettimeofday(&longtm2, NULL);
+
+    unsigned long long t = 1000 * (longtm2.tv_sec - longtm.tv_sec) + (longtm2.tv_usec - longtm.tv_usec) / 1000;
     return t;
 }
 
@@ -191,7 +211,7 @@ int main(int argc, char *argv[])
     {
         printf("Failed to set monitor mode.\n");
         exit(EXIT_FAILURE);
-     }
+    }
 
     if(pcap_activate(pcap_h) != 0)
     {
@@ -222,11 +242,23 @@ int main(int argc, char *argv[])
     //counter for continuous ACK fail
     int noACKcounter = 0;
 
+    //start long timer
+    startLongTimer();
+
     //infinite listen-respond loop
     while (1)
     {
         //receive packet
         const u_char *packet = pcap_next(pcap_h, &header);
+
+        unsigned long long LongtimeSincePrevPacket = stopLongTimer();
+
+        if (LongtimeSincePrevPacket > SUTTIMEOUTMS)
+        {
+            printf("\e[31mIt took %llu ms to receive any frame from the SUT. Possible crash?\e[39m\n", LongtimeSincePrevPacket);
+        }
+
+        startLongTimer();
 
         unsigned long long timeSincePrevPacket = stopTimer();
 
@@ -296,7 +328,7 @@ int main(int argc, char *argv[])
                 noACKcounter = noACKcounter + 1;
                 if (noACKcounter == 10)
                 {
-                    printf("Frame not ACKed after 10 retries, moving on\n");
+                    printf("\e[31mFrame not ACKed after 10 retries, moving on\e[39m\n");
                     noACKcounter = 0;
                     increaseFuzzer();
                 }

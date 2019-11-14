@@ -2,7 +2,11 @@
 Sub-fuzzer template for fuzzing a specific information element.
 Change all places with "update this" as comment.
 Also change all words with template in them.
-And do not forget to change the header file.
+
+Files to change when adding subfuzzer:
+- subfuzzer header file
+- fuzzer.c with includes
+- frameCreator.c with includes
 */
 #include <stdio.h>
 #include <stdlib.h>

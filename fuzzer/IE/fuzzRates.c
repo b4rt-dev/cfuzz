@@ -25,6 +25,7 @@ void ratesPrintCurrentState()
     {
         case 0: 
         {
+            printf("\e[33mFuzzing rates IE\e[39m\n");
             printf("Trying rates with zero length or no element\n");
             break;
         }
@@ -50,7 +51,7 @@ void ratesPrintCurrentState()
         }
         case 5:
         {
-            printf("Done with fuzzing rates\n");
+            printf("\e[33mDone with fuzzing rates IE\e[39m\n");
             break;
         }
     }
