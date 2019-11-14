@@ -16,7 +16,7 @@ int templateRunningState = 0;
 //Number of fuzzing states
 const int templateStates =  2;          //update this
 //Steps of fuzzers for each fuzzing state
-const int templateSteps[] =   {2, 3};   //update this
+const int templateSteps[] =   {1, 3};   //update this
 
 //Current state and step of the templateFuzzer
 int fuzzState;
@@ -28,7 +28,7 @@ void templatePrintCurrentState() //update this
     {
         case 0: 
         {
-            printf("Fuzzing template state 1\n");
+            printf("Trying 255*0xFF data\n");
             break;
         }
         case 1: 
@@ -66,7 +66,7 @@ int templateFuzzUpdate(int status)
             if (templateRunningState == 1) //sanity check
             {
                 //increase steps until all steps are done
-                if (fuzzStep < templateSteps[fuzzState])
+                if (fuzzStep < templateSteps[fuzzState]-1)
                     fuzzStep = fuzzStep + 1;
                 //then increase state and notify
                 else
@@ -101,7 +101,7 @@ infoElem templateFuzz()
     //What to return when not fuzzed
     if (templateRunningState == 0) //update this
     {
-        template.id = 0;
+        template.id = 0; //update this
         template.len = 1;
         template.len_data = 1;
         template.data = "\xab";
@@ -110,17 +110,19 @@ infoElem templateFuzz()
     {
         switch (fuzzState) //update this
         {
-            case 0: //template incorrect length
+            case 0:     //255*0xff
             {
-                template.id = 0;
-                template.len = fuzzStep;
-                template.len_data = 3;
-                template.data = "\xab\xcd\xef";
-                break;
+                template.id = 0; //update this
+                template.len = 255;
+                template.len_data = 255;
+                //create data of 255 times 0xff
+                u_char *data = malloc(255);
+                memset(data, 0xff, 255);
+                template.data = data;
             }
-            case 2:  //template null data
+            case 1:  //template null data
             {
-                template.id = 0;
+                template.id = 0; //update this
                 template.len = 1;
                 template.len_data = 1;
                 template.data = "\x00";

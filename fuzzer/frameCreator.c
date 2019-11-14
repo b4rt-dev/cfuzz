@@ -9,6 +9,7 @@ Creates frames.
 #include "fuzzer.h"
 #include "frameDefinitions.h"
 #include "fuzzSSID.h"
+#include "fuzzRates.h"
 
 //Creates Authentication frame
 u_char *createAuthResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
@@ -117,8 +118,11 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
     int len_taggedParams = 0;
     for(int i = 0; i < numberOfAssInfoElems; i++)
     {
-        //+2 to include id and len field size
-        len_taggedParams = len_taggedParams + taggedParams[i].len_data+2; 
+        if (taggedParams[i].len_data != -1) //do not include if len_data == -1
+        {
+            //+2 to include id and len field size
+            len_taggedParams = len_taggedParams + taggedParams[i].len_data+2; 
+        }
     }
 
     //fill in struct
@@ -203,14 +207,17 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
     //copy all information elements
     for(int i = 0; i < numberOfAssInfoElems; i++)
     {
-        memcpy(assRespPacket + copyOffset, &taggedParams[i].id, 1);
-        copyOffset = copyOffset + 1;
+        if (taggedParams[i].len_data != -1)  //if id == -1, we do not want to include the information element
+        {
+            memcpy(assRespPacket + copyOffset, &taggedParams[i].id, 1);
+            copyOffset = copyOffset + 1;
 
-        memcpy(assRespPacket + copyOffset, &taggedParams[i].len, 1);
-        copyOffset = copyOffset + 1;
+            memcpy(assRespPacket + copyOffset, &taggedParams[i].len, 1);
+            copyOffset = copyOffset + 1;
 
-        memcpy(assRespPacket + copyOffset, taggedParams[i].data, taggedParams[i].len_data);
-        copyOffset = copyOffset + taggedParams[i].len_data;
+            memcpy(assRespPacket + copyOffset, taggedParams[i].data, taggedParams[i].len_data);
+            copyOffset = copyOffset + taggedParams[i].len_data;
+        }
     }
         
 
@@ -228,20 +235,9 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
 
     //definition of all info elements
 
-    /*infoElem ssid = {
-        0,         //id
-        8,         //len
-        8,         //real length of data
-        "\x43\x43\x43\x43\x43\x43\x43\x43" //data
-    };*/
     infoElem ssid = ssidFuzz();
 
-    infoElem suppRates = {
-        1,         //id
-        7,         //len
-        7,         //real length of data
-        "\x96\x18\x24\x30\x48\x60\x6c" //data
-    };
+    infoElem suppRates = ratesFuzz();
 
     infoElem dsParam = {
         3,         //id
@@ -257,8 +253,11 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
     int len_taggedParams = 0;
     for(int i = 0; i < numberOfProbeInfoElems; i++)
     {
-        //+2 to include id and len field size
-        len_taggedParams = len_taggedParams + taggedParams[i].len_data+2; 
+        if (taggedParams[i].len_data != -1) //do not include when len_data == -1
+        {
+            //+2 to include id and len field size
+            len_taggedParams = len_taggedParams + taggedParams[i].len_data+2; 
+        }
     }
 
     //fill in struct
@@ -343,14 +342,17 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
     //copy all information elements
     for(int i = 0; i < numberOfProbeInfoElems; i++)
     {
-        memcpy(probeRespPacket + copyOffset, &taggedParams[i].id, 1);
-        copyOffset = copyOffset + 1;
+        if (taggedParams[i].len_data != -1)  //if id == -1, we do not want to include the information element
+        {
+            memcpy(probeRespPacket + copyOffset, &taggedParams[i].id, 1);
+            copyOffset = copyOffset + 1;
 
-        memcpy(probeRespPacket + copyOffset, &taggedParams[i].len, 1);
-        copyOffset = copyOffset + 1;
+            memcpy(probeRespPacket + copyOffset, &taggedParams[i].len, 1);
+            copyOffset = copyOffset + 1;
 
-        memcpy(probeRespPacket + copyOffset, taggedParams[i].data, taggedParams[i].len_data);
-        copyOffset = copyOffset + taggedParams[i].len_data;
+            memcpy(probeRespPacket + copyOffset, taggedParams[i].data, taggedParams[i].len_data);
+            copyOffset = copyOffset + taggedParams[i].len_data;
+        }
     }
         
 

@@ -7,12 +7,13 @@ Manages what to fuzz when.
 #include <string.h>
 #include "frameDefinitions.h"
 #include "fuzzSSID.h"
+#include "fuzzRates.h"
 
 //Number of subfuzzers
-#define SUBFUZZERS (1)
+#define SUBFUZZERS (2)
 
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {ratesFuzzUpdate, ssidFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done

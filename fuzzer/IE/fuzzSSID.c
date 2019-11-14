@@ -14,9 +14,9 @@ TODO
 int ssidRunningState = 0;
 
 //Number of fuzzing states
-const int ssidStates =  4;
+const int ssidStates =  5;
 //Steps of fuzzers for each fuzzing state
-const int ssidSteps[] =   {45, 45, 16, 256};
+const int ssidSteps[] =   {45, 45, 16, 256, 1};
 
 //Current state and step of the ssidFuzzer
 int fuzzState;
@@ -48,6 +48,11 @@ void ssidPrintCurrentState()
         }
         case 4:
         {
+            printf("Trying 255*0xFF data\n");
+            break;
+        }
+        case 5:
+        {
             printf("Done with fuzzing SSID\n");
             break;
         }
@@ -76,7 +81,7 @@ int ssidFuzzUpdate(int status)
             if (ssidRunningState == 1) //sanity check
             {
                 //increase steps until all steps are done
-                if (fuzzStep < ssidSteps[fuzzState])
+                if (fuzzStep < ssidSteps[fuzzState]-1)
                     fuzzStep = fuzzStep + 1;
                 //then increase state and notify
                 else
@@ -199,6 +204,16 @@ infoElem ssidFuzz()
                 ssid.data = data;
                 break;
             } 
+            case 4:     //255*0xff
+            {
+                ssid.id = 0;
+                ssid.len = 255;
+                ssid.len_data = 255;
+                //create data of 255 times 0xff
+                u_char *data = malloc(255);
+                memset(data, 0xff, 255);
+                ssid.data = data;
+            }
         }
 
     }
