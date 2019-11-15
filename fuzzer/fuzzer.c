@@ -9,15 +9,17 @@ Manages what to fuzz when.
 #include "fuzzSSID.h"
 #include "fuzzRates.h"
 #include "fuzzFH.h"
+#include "fuzzDS.h"
+#include "fuzzTIM.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 //CHANGE WHEN NEW SUBFUZZER
 //Number of subfuzzers
-#define SUBFUZZERS (3)
+#define SUBFUZZERS (5)
 
 //CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done

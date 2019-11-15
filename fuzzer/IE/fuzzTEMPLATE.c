@@ -32,6 +32,7 @@ void templatePrintCurrentState() //update this
     {
         case 0: 
         {
+            printf("\e[33mFuzzing TEMPLATE IE\e[39m\n");
             printf("Trying 255*0xFF data\n");
             break;
         }
@@ -42,7 +43,7 @@ void templatePrintCurrentState() //update this
         }
         case 2:
         {
-            printf("Done with fuzzing template\n");
+            printf("\e[33mDone with fuzzing template\e[39m\n");
             break;
         }
     }
@@ -107,7 +108,7 @@ infoElem templateFuzz()
     {
         template.id = 0; //update this
         template.len = 1;
-        template.len_data = 1;
+        template.len_data = -1;
         template.data = "\xab";
     }
     else
@@ -123,6 +124,7 @@ infoElem templateFuzz()
                 u_char *data = malloc(255);
                 memset(data, 0xff, 255);
                 template.data = data;
+                break;
             }
             case 1:  //template null data
             {

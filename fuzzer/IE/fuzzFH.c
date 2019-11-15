@@ -117,6 +117,7 @@ infoElem fhFuzz()
                 u_char *data = malloc(255);
                 memset(data, 0xff, 255);
                 fh.data = data;
+                break;
             }
             case 1:  //fh different lengths
             {
@@ -127,7 +128,7 @@ infoElem fhFuzz()
                     fh.id = 2;
                     fh.len = dataSize;
                     fh.len_data = dataSize;
-                    //create data of datasize times 0x96
+                    //create data of datasize times 0x00 or 0xff
                     u_char *data = malloc(dataSize);
                     if (fuzzStep % 2 == 0) //even
                         memset(data, 0x00, dataSize);
@@ -142,7 +143,7 @@ infoElem fhFuzz()
                     fh.id = 2;
                     fh.len = dataSize;
                     fh.len_data = dataSize;
-                    //create data of datasize times 0x96
+                    //create data of datasize times 0x00 or 0xff
                     u_char *data = malloc(dataSize);
                     if (fuzzStep % 2 == 0) //even
                         memset(data, 0x00, dataSize);

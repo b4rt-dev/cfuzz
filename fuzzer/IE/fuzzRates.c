@@ -212,6 +212,7 @@ infoElem ratesFuzz()
                 u_char *data = malloc(255);
                 memset(data, 0xff, 255);
                 rates.data = data;
+                break;
             }
         }
     }

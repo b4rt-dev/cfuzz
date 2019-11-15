@@ -42,9 +42,9 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 */
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
-u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
+//u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
-//u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
+u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 
 //Returns filter for libpcap
 //we want to use as many filters here as possible, since libpcap is closer to the hardware than this user-level program

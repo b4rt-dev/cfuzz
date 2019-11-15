@@ -214,6 +214,7 @@ infoElem ssidFuzz()
                 u_char *data = malloc(255);
                 memset(data, 0xff, 255);
                 ssid.data = data;
+                break;
             }
         }
 
