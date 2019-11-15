@@ -1,5 +1,5 @@
 /*
-Fuzzes Supported rates Information element
+Fuzzes DS Information element
 */
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,4 +1,6 @@
 /*
+Fuzzes template Information element
+
 Sub-fuzzer template for fuzzing a specific information element.
 Change all places with "update this" as comment.
 Also change all words with template in them.

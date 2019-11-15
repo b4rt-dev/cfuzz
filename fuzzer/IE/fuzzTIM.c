@@ -1,8 +1,5 @@
 /*
-Fuzzes Supported TIM Information element
-Files to change when adding subfuzzer:
-- fuzzer.c with includes
-- frameCreator.c with includes
+Fuzzes TIM Information element
 */
 #include <stdio.h>
 #include <stdlib.h>

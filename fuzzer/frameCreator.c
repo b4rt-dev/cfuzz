@@ -12,6 +12,7 @@ Creates frames.
 #include "fuzzRates.h"
 #include "fuzzFH.h"
 #include "fuzzDS.h"
+#include "fuzzCF.h"
 #include "fuzzTIM.h"
 //CHANGE WHEN NEW SUBFUZZER
 
@@ -237,7 +238,7 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
 u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
 {
     //CHANGE WHEN NEW SUBFUZZER
-    #define numberOfProbeInfoElems (5)   //number of information elements
+    #define numberOfProbeInfoElems (6)   //number of information elements
 
     //definition of all info elements 
     //CHANGE WHEN NEW SUBFUZZER
@@ -245,11 +246,12 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
     infoElem suppRates = ratesFuzz();
     infoElem fh = fhFuzz();
     infoElem ds = dsFuzz();
+    infoElem cf = cfFuzz();
     infoElem tim = timFuzz();
 
     //CHANGE WHEN NEW SUBFUZZER
     //create array of information elements
-    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, tim};
+    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, cf, tim};
 
     //length of all info elements, including id and len field
     int len_taggedParams = 0;

@@ -1,8 +1,5 @@
 /*
 Fuzzes SSID Information element
-
-TODO
-- free after malloc (actually, find a better alternative for malloc)
 */
 #include <stdio.h>
 #include <stdlib.h>
