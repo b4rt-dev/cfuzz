@@ -106,9 +106,9 @@ infoElem templateFuzz()
     infoElem template;
 
     //What to return when not fuzzed
-    if (templateRunningState == 0) //update this
+    if (templateRunningState == 0)
     {
-        template.id = 0; //update this
+        template.id = 0;
         template.len = 1;
         template.len_data = -1;
         template.data = "\xab";

@@ -12,15 +12,16 @@ Manages what to fuzz when.
 #include "fuzzDS.h"
 #include "fuzzCF.h"
 #include "fuzzTIM.h"
+#include "fuzzIBSS.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 //CHANGE WHEN NEW SUBFUZZER
 //Number of subfuzzers
-#define SUBFUZZERS (6)
+#define SUBFUZZERS (7)
 
 //CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done
