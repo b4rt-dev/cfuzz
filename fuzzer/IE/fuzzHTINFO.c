@@ -1,5 +1,5 @@
 /*
-Fuzzes ht capabilities Information element
+Fuzzes ht info Information element
 */
 #include <stdio.h>
 #include <stdlib.h>
