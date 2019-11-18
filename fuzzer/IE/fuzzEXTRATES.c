@@ -13,7 +13,7 @@ int extratesRunningState = 0;
 //Number of fuzzing states
 const int extratesStates =  5;
 //Steps of fuzzers for each fuzzing state
-const int extratesSteps[] =   {2, 4, 32, 32, 1};
+const int extratesSteps[] =   {1, 4, 32, 32, 1};
 
 //Current state and step of the extratesFuzzer
 int fuzzState;
@@ -123,7 +123,7 @@ infoElem extratesFuzz()
     {
         switch (fuzzState)
         {
-            case 0: //no extrates or no data
+            case 0: //no data
             {
                 if (fuzzStep == 0)
                 {
@@ -131,15 +131,7 @@ infoElem extratesFuzz()
                     extrates.len = 0;
                     extrates.len_data = 0;
                     extrates.data = "";
-                }
-                else if (fuzzStep == 1)
-                {
-                    extrates.id = 50;
-                    extrates.len = 0;
-                    extrates.len_data = -1;
-                    extrates.data = "";
-                }
-                
+                }              
                 break;
             }
             case 1:  //duplicate extrates

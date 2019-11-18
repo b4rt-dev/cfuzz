@@ -21,6 +21,8 @@ Creates frames.
 #include "fuzzREQUEST.h"
 #include "fuzzERP.h"
 #include "fuzzEXTRATES.h"
+#include "fuzzHTCAPAB.h"
+#include "fuzzHTINFO.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 
@@ -245,7 +247,7 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
 u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
 {
     //CHANGE WHEN NEW SUBFUZZER
-    #define numberOfProbeInfoElems (13)   //number of information elements
+    #define numberOfProbeInfoElems (15)   //number of information elements
 
     //definition of all info elements 
     //CHANGE WHEN NEW SUBFUZZER
@@ -262,10 +264,12 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
     infoElem request = requestFuzz();
     infoElem erp = erpFuzz();
     infoElem extrates = extratesFuzz();
+    infoElem htcapab = htcapabFuzz();
+    infoElem htinfo = htinfoFuzz();
 
     //CHANGE WHEN NEW SUBFUZZER
     //create array of information elements
-    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, cf, tim, ibss, country, hopparm, hoptable, request, erp, extrates};
+    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, cf, tim, ibss, country, hopparm, hoptable, request, erp, extrates, htcapab, htinfo};
 
     //length of all info elements, including id and len field
     int len_taggedParams = 0;
