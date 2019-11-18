@@ -23,15 +23,17 @@ Manages what to fuzz when.
 #include "fuzzHTINFO.h"
 #include "fuzzAPREPORT.h"
 #include "fuzzEXTCAPAB.h"
+#include "fuzzBSSLOAD.h"
+#include "fuzzRSN.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 //CHANGE WHEN NEW SUBFUZZER
 //Number of subfuzzers
-#define SUBFUZZERS (17)
+#define SUBFUZZERS (19)
 
 //CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {extcapabFuzzUpdate, apreportFuzzUpdate, htinfoFuzzUpdate, htcapabFuzzUpdate, extratesFuzzUpdate, erpFuzzUpdate, requestFuzzUpdate, hoptableFuzzUpdate, hopparmFuzzUpdate, countryFuzzUpdate, ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {rsnFuzzUpdate, bssloadFuzzUpdate, extcapabFuzzUpdate, apreportFuzzUpdate, htinfoFuzzUpdate, htcapabFuzzUpdate, extratesFuzzUpdate, erpFuzzUpdate, requestFuzzUpdate, hoptableFuzzUpdate, hopparmFuzzUpdate, countryFuzzUpdate, ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done
