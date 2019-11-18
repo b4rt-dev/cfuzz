@@ -1,5 +1,5 @@
 /*
-Fuzzes ibss Information element
+Fuzzes hopping pattern parameters Information element
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,31 +7,31 @@ Fuzzes ibss Information element
 #include <string.h>
 #include "../frameDefinitions.h"
 
-//Indecates whether the ibssFuzzer is running
-int ibssRunningState = 0;
+//Indecates whether the hopparmFuzzer is running
+int hopparmRunningState = 0;
 
 //Number of fuzzing states
-const int ibssStates =  4;
+const int hopparmStates =  4;
 //Steps of fuzzers for each fuzzing state
-const int ibssSteps[] =   {1, 2, 16, 16};
+const int hopparmSteps[] =   {1, 2, 16, 16};
 
-//Current state and step of the ibssFuzzer
+//Current state and step of the hopparmFuzzer
 int fuzzState;
 int fuzzStep;
 
-void ibssPrintCurrentState()
+void hopparmPrintCurrentState()
 {
     switch (fuzzState)
     {
         case 0: 
         {
-            printf("\e[33mFuzzing ibss IE\e[39m\n");
+            printf("\e[33mFuzzing hopparm IE\e[39m\n");
             printf("Trying 255*0xFF data\n");
             break;
         }
         case 1: 
         {
-            printf("Fuzzing ATIM Window\n");
+            printf("Fuzzing data\n");
             break;
         }
         case 2: 
@@ -46,47 +46,47 @@ void ibssPrintCurrentState()
         }
         case 4:
         {
-            printf("\e[33mDone with fuzzing ibss\e[39m\n");
+            printf("\e[33mDone with fuzzing hopparm\e[39m\n");
             break;
         }
     }
 }
 
-//Updates ibssFuzzer
+//Updates hopparmFuzzer
 //Status 0 indicates start
 //Status 1 indicates increaseStep
 //Status 2 indicates stop
 //Returns -1 if done with fuzzing
-int ibssFuzzUpdate(int status)
+int hopparmFuzzUpdate(int status)
 {
     switch (status)
     {
         case 0: //start fuzzer
         {
-            ibssRunningState    = 1;
+            hopparmRunningState    = 1;
             fuzzState       = 0;
             fuzzStep        = 0;
-            ibssPrintCurrentState();
+            hopparmPrintCurrentState();
             break;
         }
         case 1: //update fuzzer
         {
-            if (ibssRunningState == 1) //sanity check
+            if (hopparmRunningState == 1) //sanity check
             {
                 //increase steps until all steps are done
-                if (fuzzStep < ibssSteps[fuzzState]-1)
+                if (fuzzStep < hopparmSteps[fuzzState]-1)
                     fuzzStep = fuzzStep + 1;
                 //then increase state and notify
                 else
                 {
                     fuzzStep = 0;
                     fuzzState = fuzzState + 1;
-                    ibssPrintCurrentState();
+                    hopparmPrintCurrentState();
                 }
                 //when all states are done, stop
-                if (fuzzState == ibssStates)
+                if (fuzzState == hopparmStates)
                 {
-                    ibssRunningState = 0;
+                    hopparmRunningState = 0;
                     return -1;
                 }
             }
@@ -94,25 +94,25 @@ int ibssFuzzUpdate(int status)
         }
         case 2: //stop fuzzer
         {
-            ibssRunningState = 0;
+            hopparmRunningState = 0;
             break;
         }
     }
     return 0;
 }
 
-//Returns an ibss information element
-infoElem ibssFuzz()
+//Returns an hopparm information element
+infoElem hopparmFuzz()
 {
-    infoElem ibss;
+    infoElem hopparm;
 
     //What to return when not fuzzed
-    if (ibssRunningState == 0)
+    if (hopparmRunningState == 0)
     {
-        ibss.id = 0;
-        ibss.len = 1;
-        ibss.len_data = -1;
-        ibss.data = "\xab";
+        hopparm.id = 0;
+        hopparm.len = 1;
+        hopparm.len_data = -1;
+        hopparm.data = "\xab";
     }
     else
     {
@@ -120,30 +120,30 @@ infoElem ibssFuzz()
         {
             case 0:     //255*0xff
             {
-                ibss.id = 6;
-                ibss.len = 255;
-                ibss.len_data = 255;
+                hopparm.id = 8;
+                hopparm.len = 255;
+                hopparm.len_data = 255;
                 //create data of 255 times 0xff
                 u_char *data = malloc(255);
                 memset(data, 0xff, 255);
-                ibss.data = data;
+                hopparm.data = data;
                 break;
             }
-            case 1:  //ibss null data
+            case 1:  //hopparm data
             {
                 if (fuzzStep == 0)
                 {
-                    ibss.id = 6;
-                    ibss.len = 2;
-                    ibss.len_data = 2;
-                    ibss.data = "\x00\x00";
+                    hopparm.id = 8;
+                    hopparm.len = 2;
+                    hopparm.len_data = 2;
+                    hopparm.data = "\x00\x00";
                 }
                 else
                 {
-                    ibss.id = 6;
-                    ibss.len = 2;
-                    ibss.len_data = 2;
-                    ibss.data = "\xFF\xFF";
+                    hopparm.id = 8;
+                    hopparm.len = 2;
+                    hopparm.len_data = 2;
+                    hopparm.data = "\xFF\xFF";
                 }
                 
                 break;
@@ -154,25 +154,25 @@ infoElem ibssFuzz()
                 {
                     int dataSize = fuzzStep;
 
-                    ibss.id = 6;
-                    ibss.len = dataSize;
-                    ibss.len_data = dataSize;
+                    hopparm.id = 8;
+                    hopparm.len = dataSize;
+                    hopparm.len_data = dataSize;
                     //create data of datasize times 0xff
                     u_char *data = malloc(dataSize);
                     memset(data, 0xff, dataSize);
-                    ibss.data = data;
+                    hopparm.data = data;
                 }
                 else
                 {
                     int dataSize = 255 - fuzzStep + 8;
 
-                    ibss.id = 6;
-                    ibss.len = dataSize;
-                    ibss.len_data = dataSize;
+                    hopparm.id = 8;
+                    hopparm.len = dataSize;
+                    hopparm.len_data = dataSize;
                     //create data of datasize times 0xff
                     u_char *data = malloc(dataSize);
                     memset(data, 0xff, dataSize);
-                    ibss.data = data;
+                    hopparm.data = data;
                 }
                 break;
             } 
@@ -182,30 +182,30 @@ infoElem ibssFuzz()
                 {
                     int dataSize = fuzzStep;
 
-                    ibss.id = 6;
-                    ibss.len = dataSize;
-                    ibss.len_data = dataSize;
+                    hopparm.id = 8;
+                    hopparm.len = dataSize;
+                    hopparm.len_data = dataSize;
                     //create data of datasize times 0x00
                     u_char *data = malloc(dataSize);
                     memset(data, 0x00, dataSize);
-                    ibss.data = data;
+                    hopparm.data = data;
                 }
                 else
                 {
                     int dataSize = 255 - fuzzStep + 8;
 
-                    ibss.id = 6;
-                    ibss.len = dataSize;
-                    ibss.len_data = dataSize;
+                    hopparm.id = 8;
+                    hopparm.len = dataSize;
+                    hopparm.len_data = dataSize;
                     //create data of datasize times 0x00
                     u_char *data = malloc(dataSize);
                     memset(data, 0x00, dataSize);
-                    ibss.data = data;
+                    hopparm.data = data;
                 }
                 break;
             } 
         }
     }
     
-    return ibss;
+    return hopparm;
 }
