@@ -17,6 +17,10 @@ Creates frames.
 #include "fuzzIBSS.h"
 #include "fuzzCOUNTRY.h"
 #include "fuzzHOPPARM.h"
+#include "fuzzHOPTABLE.h"
+#include "fuzzREQUEST.h"
+#include "fuzzERP.h"
+#include "fuzzEXTRATES.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 
@@ -241,7 +245,7 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
 u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
 {
     //CHANGE WHEN NEW SUBFUZZER
-    #define numberOfProbeInfoElems (9)   //number of information elements
+    #define numberOfProbeInfoElems (13)   //number of information elements
 
     //definition of all info elements 
     //CHANGE WHEN NEW SUBFUZZER
@@ -254,10 +258,14 @@ u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioT
     infoElem ibss = ibssFuzz();
     infoElem country = countryFuzz();
     infoElem hopparm = hopparmFuzz();
+    infoElem hoptable = hoptableFuzz();
+    infoElem request = requestFuzz();
+    infoElem erp = erpFuzz();
+    infoElem extrates = extratesFuzz();
 
     //CHANGE WHEN NEW SUBFUZZER
     //create array of information elements
-    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, cf, tim, ibss, country, hopparm};
+    infoElem taggedParams[numberOfProbeInfoElems] = {ssid, suppRates, fh, ds, cf, tim, ibss, country, hopparm, hoptable, request, erp, extrates};
 
     //length of all info elements, including id and len field
     int len_taggedParams = 0;
