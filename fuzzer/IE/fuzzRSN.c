@@ -13,7 +13,7 @@ int rsnRunningState = 0;
 //Number of fuzzing states
 const int rsnStates =  10;
 //Steps of fuzzers for each fuzzing state
-const int rsnSteps[] =   {1, 4, 8, 8, 8, 8, 32, 255, 16, 6};
+const int rsnSteps[] =   {1, 4, 8, 8, 8, 8, 32, 16, 16, 6};
 
 //Current state and step of the rsnFuzzer
 int fuzzState;
@@ -319,27 +319,52 @@ infoElem rsnFuzz()
             } 
             case 7:
             {
-                rsn.id = 48;
-                rsn.len = 42;
-                rsn.len_data = 42;
-                u_char *data = malloc(42);
-                u_char *valid = "\x01\x00\x00\x0f\xac\x02\x01\x00"
-                                "\x00\x0f\xac\xff\x01\x00"
-                                "\x00\x0f\xac\xff\x00\x00\x01\x00"
-                                "\xff\xff\xff\xff\xff\xff\xff\xff"
-                                "\xff\xff\xff\xff\xff\xff\xff\xff"
-                                "\x00\x0f\xac\xff";
-                memcpy(data, valid, 42);
-                data[11] = fuzzStep;
-                data[17] = fuzzStep;
-                int i;
-                for (i=0; i<16; i++)
+                if (fuzzStep < 8)
                 {
-                    data[22+i] = fuzzStep;
+                    rsn.id = 48;
+                    rsn.len = 42;
+                    rsn.len_data = 42;
+                    u_char *data = malloc(42);
+                    u_char *valid = "\x01\x00\x00\x0f\xac\x02\x01\x00"
+                                    "\x00\x0f\xac\xff\x01\x00"
+                                    "\x00\x0f\xac\xff\x00\x00\x01\x00"
+                                    "\xff\xff\xff\xff\xff\xff\xff\xff"
+                                    "\xff\xff\xff\xff\xff\xff\xff\xff"
+                                    "\x00\x0f\xac\xff";
+                    memcpy(data, valid, 42);
+                    data[11] = fuzzStep;
+                    data[17] = fuzzStep;
+                    int i;
+                    for (i=0; i<16; i++)
+                    {
+                        data[22+i] = fuzzStep;
+                    }
+                    data[41] = fuzzStep;
+                    rsn.data = data;
                 }
-                data[41] = fuzzStep;
-                rsn.data = data;
-
+                else
+                {
+                    rsn.id = 48;
+                    rsn.len = 42;
+                    rsn.len_data = 42;
+                    u_char *data = malloc(42);
+                    u_char *valid = "\x01\x00\x00\x0f\xac\x02\x01\x00"
+                                    "\x00\x0f\xac\xff\x01\x00"
+                                    "\x00\x0f\xac\xff\x00\x00\x01\x00"
+                                    "\xff\xff\xff\xff\xff\xff\xff\xff"
+                                    "\xff\xff\xff\xff\xff\xff\xff\xff"
+                                    "\x00\x0f\xac\xff";
+                    memcpy(data, valid, 42);
+                    data[11] = 255 - fuzzStep + 8;
+                    data[17] = 255 - fuzzStep + 8;
+                    int i;
+                    for (i=0; i<16; i++)
+                    {
+                        data[22+i] = 255 - fuzzStep + 8;
+                    }
+                    data[41] = 255 - fuzzStep + 8;
+                    rsn.data = data;
+                }
                 break;
             }
             case 8:

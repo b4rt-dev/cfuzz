@@ -34,8 +34,8 @@ Manages what to fuzz when.
 
 //CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
-int (*p[SUBFUZZERS]) (int i) = {vendorFuzzUpdate, rsnFuzzUpdate, bssloadFuzzUpdate, extcapabFuzzUpdate, apreportFuzzUpdate, htinfoFuzzUpdate, htcapabFuzzUpdate, extratesFuzzUpdate, erpFuzzUpdate, requestFuzzUpdate, hoptableFuzzUpdate, hopparmFuzzUpdate, countryFuzzUpdate, ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
-
+//int (*p[SUBFUZZERS]) (int i) = {vendorFuzzUpdate, rsnFuzzUpdate, bssloadFuzzUpdate, extcapabFuzzUpdate, apreportFuzzUpdate, htinfoFuzzUpdate, htcapabFuzzUpdate, extratesFuzzUpdate, erpFuzzUpdate, requestFuzzUpdate, hoptableFuzzUpdate, hopparmFuzzUpdate, countryFuzzUpdate, ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
+int (*p[SUBFUZZERS]) (int i) = {ssidFuzzUpdate, ratesFuzzUpdate, fhFuzzUpdate, dsFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, ibssFuzzUpdate, countryFuzzUpdate, hopparmFuzzUpdate, hoptableFuzzUpdate, requestFuzzUpdate, erpFuzzUpdate, extratesFuzzUpdate, htcapabFuzzUpdate, htinfoFuzzUpdate, apreportFuzzUpdate, extcapabFuzzUpdate, bssloadFuzzUpdate, rsnFuzzUpdate, vendorFuzzUpdate};
 //State of sub-fuzzer
 //-1 = Done
 //0  = In progress
