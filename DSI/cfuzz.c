@@ -35,26 +35,18 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //Is needed to ignore frames from other devices
 /*List of MACs for test devices:
 - d0:17:6a:e8:e9:7a Samsung Galaxy Ace
-- 6c:ad:f8:c8:77:ca Chromecast 1
+- xx:xx:xx:xx:xx:xx Chromecast 1
 - ec:9b:f3:1e:19:71 Samsung Galaxy S6
 - cc:fa:00:c9:fc:ad LG Optimus G
 - 12:42:2a:7e:d4:e8 Orange Pi Zero
-- 00:09:bf:7d:6d:aa Nintendo DS
 */
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
 //u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
-//u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
-//u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
-//u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
-//u_char sutMAC[6]            =  "\x9c\xe6\x35\x2a\x69\x16"; //WII U
-u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
-
-
-
-
+//u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI XL
+u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI XL
 
 
 //Returns filter for libpcap
@@ -65,27 +57,7 @@ u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
 //when changing the filterString, the strncpy() locations should also be changed!
 const char *getFilterString()
 {
-    //xx:xx:xx:xx:xx:xx will become myMAC, yy:yy:yy:yy:yy:yy will become sutMAC
-    static char filterString[] = "(wlan subtype probe-req and (wlan addr1 xx:xx:xx:xx:xx:xx or wlan addr1 ff:ff:ff:ff:ff:ff) and wlan addr2 yy:yy:yy:yy:yy:yy)" \
-    " or ( wlan addr1 xx:xx:xx:xx:xx:xx and wlan addr2 yy:yy:yy:yy:yy:yy and ( wlan subtype auth or wlan subtype assoc-req))" \
-    " or ( wlan addr1 xx:xx:xx:xx:xx:xx and wlan subtype ack)";
-
-    //convert myMAC and sutMAC to strings
-    char myMacStr[18];
-    char sutMacStr[18];
-
-    snprintf(myMacStr, sizeof(myMacStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-             myMAC[0], myMAC[1], myMAC[2], myMAC[3], myMAC[4], myMAC[5]);
-
-    snprintf(sutMacStr, sizeof(sutMacStr), "%02x:%02x:%02x:%02x:%02x:%02x",
-             sutMAC[0], sutMAC[1], sutMAC[2], sutMAC[3], sutMAC[4], sutMAC[5]);
-
-    //replace placeholder MACs in filterString with correct MACstring (hardcoded positions!)
-    strncpy(filterString+40, myMacStr,17);
-    strncpy(filterString+106, sutMacStr,17);
-    strncpy(filterString+141, myMacStr,17);
-    strncpy(filterString+174, sutMacStr,17);
-    strncpy(filterString+260, myMacStr,17);
+    static char filterString[] = "wlan addr2 e0:e7:51:45:5e:5d";
 
     return filterString;
 }
@@ -260,137 +232,33 @@ int main(int argc, char *argv[])
     while (1)
     {
         //receive packet
-        const u_char *packet = pcap_next(pcap_h, &header);
+        const u_char *rpacket = pcap_next(pcap_h, &header);
 
-        unsigned long long LongtimeSincePrevPacket = stopLongTimer();
+        printf("Received Frame\n");
 
-        if (LongtimeSincePrevPacket > SUTTIMEOUTMS)
+        int packetSize;
+        u_char *packet = createProbeResponse(sutMAC, &packetSize, radioTapHeader, myMAC);
+        sendPacket(pcap_h, packet, packetSize);
+        free(packet);      //free allocated memory
+
+        printf("Sent frame:\n");
+        //print failed frame
+        int printCounter = 0;
+        for(int i = 0; i < packetSize; i++)
         {
-            printf("\e[31mIt took %llu ms to receive any frame from the SUT. Possible crash?\e[39m\n", LongtimeSincePrevPacket);
-        }
-
-        startLongTimer();
-
-        unsigned long long timeSincePrevPacket = stopTimer();
-
-        u_char frameType = getFrameTypeOfPacket(packet);
-
-        u_char* sourceAddr;
-
-
-        if (frameType != 0xd4) //ACK frames have no source address
-            sourceAddr = getSourceAddrOfPacket(packet);
-
-        //if we had to wait for an ACK, verify if current frame is an ACK
-        if (waitForACK != 0)
-        {
-            if (stopTimer() <= 10)
+            printf("%02X ", packet[i]);
+            printCounter = printCounter + 1;
+            if (printCounter == 16)
             {
-                if (frameType == 0xd4)
-                {
-                    if (DEBUG)
-                    {
-                        switch (waitForACK)
-                        {
-                            case 1:
-                            {
-                                printf("Association response ACKed\n");
-                                break;
-                            }
-                            case 2:
-                            {
-                                printf("Authentication frame ACKed\n");
-                                break;
-                            }
-                            case 3:
-                            {
-                                printf("Probe response ACKed\n");
-                                break;
-                            }
-                            default:
-                            {
-                                printf("Frame ACKed\n");
-                                break;
-                            }
-                        }
-                    }
-                    ackedFrames = ackedFrames + 1;  //the frame is acked, so increase counter
-                    waitForACK = 0;                 //we should stop waiting for ack and move on
-                    noACKcounter = 0;               //reset counter
-
-                    increaseFuzzer();               //fuzz next thing
-                    if (DEBUG)
-                    {
-                        //printf("Frame ACKed, fuzzStep is now %d\n", getFuzzStep());
-                        printf("Frame ACKed, fuzzstep unkown\n");
-                    }
-                    
-                }
-                else //received other frame. Ignore and keep listening
-                {
-                    if (DEBUG)
-                    {
-                        printf("Got other frame. Will be ignored\n");   
-                    }
-                }    
-            }
-            else //waited more than 10 ms for ack. failed
-            {
-                noACKcounter = noACKcounter + 1;
-                if (noACKcounter == 10)
-                {
-                    printf("\e[31mFrame not ACKed after 10 retries, moving on\e[39m\n");
-                    noACKcounter = 0;
-                    increaseFuzzer();
-                }
-                if (DEBUG)
-                {
-                    printf("Not sure if frame was ACKed\n");
-                }
-                waitForACK = 0;
+                printCounter = 0;
+                printf("\n");
             }
         }
-        else //Process frame depending on type
-        {
-            switch(frameType)
-            {
-                case 0x40:
-                {
-                    int packetSize;
-                    u_char *packet = createProbeResponse(sourceAddr, &packetSize, radioTapHeader, myMAC);
-                    sendPacket(pcap_h, packet, packetSize);
-                    free(packet);      //free allocated memory
-                    waitForACK = 3;
-                    startTimer();
-                    break;
-                } 
-                case 0xb0:
-                {
-                    //int packetSize;
-                    //u_char *packet = createAuthResponse(sourceAddr, &packetSize, radioTapHeader, myMAC);
-                    //sendPacket(pcap_h, packet, packetSize);
-                    //free(packet);      //free allocated memory
-                    //waitForACK = 2;
-                    //startTimer();
-                    break;
-                }
-                case 0x00:
-                {
-                    //int packetSize;
-                    //u_char *packet = createAssResponse(sourceAddr, &packetSize, radioTapHeader, myMAC);
-                    //sendPacket(pcap_h, packet, packetSize);
-                    //free(packet);      //free allocated memory
-                    //waitForACK = 1;
-                    //startTimer();
-                    break;
-                }
-                case 0xd4:
-                {
-                    break;
-                }
-                default: break;
-            }
-        }
+        printf("\n");
+
+        increaseFuzzer();
+
+        
         
     }
 
