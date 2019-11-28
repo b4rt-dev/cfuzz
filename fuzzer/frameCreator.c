@@ -28,6 +28,7 @@ Creates frames.
 #include "fuzzBSSLOAD.h"
 #include "fuzzRSN.h"
 #include "fuzzVENDOR.h"
+#include "fuzzProbeResponse.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 
@@ -251,6 +252,10 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
 //Creates Probe response frame
 u_char *createProbeResponse(u_char *dstAddress, int *packetSize, u_char * radioTapHeader, u_char *myMAC)
 {
+    //when done with all subfuzzers, we want to return frames from the generic fuzzer
+    if (getNotifyDone() != 0)
+        return PrbRespFuzz(dstAddress, packetSize, radioTapHeader, myMAC);
+
     //CHANGE WHEN NEW SUBFUZZER
     #define numberOfProbeInfoElems (20)   //number of information elements
 

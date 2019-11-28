@@ -26,6 +26,7 @@ Manages what to fuzz when.
 #include "fuzzBSSLOAD.h"
 #include "fuzzRSN.h"
 #include "fuzzVENDOR.h"
+#include "fuzzProbeResponse.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 //CHANGE WHEN NEW SUBFUZZER
@@ -36,17 +37,29 @@ Manages what to fuzz when.
 //Array of pointers to subfuzzers update functions
 //int (*p[SUBFUZZERS]) (int i) = {vendorFuzzUpdate, rsnFuzzUpdate, bssloadFuzzUpdate, extcapabFuzzUpdate, apreportFuzzUpdate, htinfoFuzzUpdate, htcapabFuzzUpdate, extratesFuzzUpdate, erpFuzzUpdate, requestFuzzUpdate, hoptableFuzzUpdate, hopparmFuzzUpdate, countryFuzzUpdate, ibssFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, dsFuzzUpdate, fhFuzzUpdate, ratesFuzzUpdate, ssidFuzzUpdate};
 int (*p[SUBFUZZERS]) (int i) = {ssidFuzzUpdate, ratesFuzzUpdate, fhFuzzUpdate, dsFuzzUpdate, cfFuzzUpdate, timFuzzUpdate, ibssFuzzUpdate, countryFuzzUpdate, hopparmFuzzUpdate, hoptableFuzzUpdate, requestFuzzUpdate, erpFuzzUpdate, extratesFuzzUpdate, htcapabFuzzUpdate, htinfoFuzzUpdate, apreportFuzzUpdate, extcapabFuzzUpdate, bssloadFuzzUpdate, rsnFuzzUpdate, vendorFuzzUpdate};
+
 //State of sub-fuzzer
 //-1 = Done
 //0  = In progress
 int subFuzzState = -1;
 
+//State of generic fuzzer
+//-1 = Done
+//0  = In progress
+int genFuzzState = -1;
+
 //Current sub-fuzzer
 //Starts with -1 to prevent skipping the first sub-fuzzer
-int subFuzzerIdx = -1;
+//int subFuzzerIdx = -1;
+int subFuzzerIdx = 99;
 
 //Flag to indicate if the done with all subfuzzers notification has been sent
 int notifyDone = 0;
+
+int getNotifyDone()
+{
+    return notifyDone;
+}
 
 int frameCounter = 0;
 
@@ -79,8 +92,24 @@ void increaseFuzzer()
             notifyDone = 1;
             printf("Done with all subfuzzers\n");
             printf("Sent %d different frames in total\n", frameCounter);
-            //Optional exit
-            exit(1);
+
+            printf("Moving on to generic fuzzing\n");
+            genFuzzState = PrbRespFuzzUpdate(0);
+
+        }
+        else
+        {
+            if (genFuzzState != -1)
+            {
+                genFuzzState = PrbRespFuzzUpdate(1);
+            }
+            else
+            {
+                printf("Done with generic fuzzing\n");
+                printf("Done with all probe response fuzzing\n");
+                printf("Fuzzer will now exit\n");
+                exit(0);
+            }
         }
     }
 }

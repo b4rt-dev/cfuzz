@@ -48,9 +48,9 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 //u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
 //u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
-//u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
+u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
 //u_char sutMAC[6]            =  "\x9c\xe6\x35\x2a\x69\x16"; //WII U
-u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
+//u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
 
 
 
@@ -253,6 +253,9 @@ int main(int argc, char *argv[])
     //counter for continuous ACK fail
     int noACKcounter = 0;
 
+    //initialize the fuzzer
+    increaseFuzzer(); 
+
     //start long timer
     startLongTimer();
 
@@ -337,9 +340,9 @@ int main(int argc, char *argv[])
             else //waited more than 10 ms for ack. failed
             {
                 noACKcounter = noACKcounter + 1;
-                if (noACKcounter == 10)
+                if (noACKcounter == 20)
                 {
-                    printf("\e[31mFrame not ACKed after 10 retries, moving on\e[39m\n");
+                    printf("\e[31mFrame not ACKed after 20 retries, moving on\e[39m\n");
                     noACKcounter = 0;
                     increaseFuzzer();
                 }

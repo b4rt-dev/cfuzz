@@ -3,4 +3,6 @@
 
 void increaseFuzzer();
 
+int getNotifyDone();
+
 #endif
