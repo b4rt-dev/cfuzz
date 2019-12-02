@@ -14,6 +14,7 @@ This is the main file. It handles sending, receiving, but also monitoring of fra
 
 #define DEBUG (0)
 #define SUTTIMEOUTMS (30000) //30s
+#define NUMBEROFCONFIRMS (5)
 
 //Used for timing
 struct timeval tm1;
@@ -33,29 +34,16 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 
 //Mac address of SUT
 //Is needed to ignore frames from other devices
-/*List of MACs for test devices:
-- d0:17:6a:e8:e9:7a Samsung Galaxy Ace
-- 6c:ad:f8:c8:77:ca Chromecast 1
-- ec:9b:f3:1e:19:71 Samsung Galaxy S6
-- cc:fa:00:c9:fc:ad LG Optimus G
-- 12:42:2a:7e:d4:e8 Orange Pi Zero
-- 00:09:bf:7d:6d:aa Nintendo DS
-*/
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
-//u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
+u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 //u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
 //u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
-u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
+//u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
 //u_char sutMAC[6]            =  "\x9c\xe6\x35\x2a\x69\x16"; //WII U
 //u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
-
-
-
-
-
 
 //Returns filter for libpcap
 //we want to use as many filters here as possible, since libpcap is closer to the hardware than this user-level program
@@ -253,6 +241,9 @@ int main(int argc, char *argv[])
     //counter for continuous ACK fail
     int noACKcounter = 0;
 
+    //number of times the frame was acked
+    int confirms = 0;
+
     //initialize the fuzzer
     increaseFuzzer(); 
 
@@ -287,10 +278,12 @@ int main(int argc, char *argv[])
         //if we had to wait for an ACK, verify if current frame is an ACK
         if (waitForACK != 0)
         {
-            if (stopTimer() <= 10)
+            //printf("Received frame of type %d\n", frameType);
+            if (stopTimer() <= 30)
             {
                 if (frameType == 0xd4)
                 {
+                    //printf("ACKed\n");
                     if (DEBUG)
                     {
                         switch (waitForACK)
@@ -321,11 +314,19 @@ int main(int argc, char *argv[])
                     waitForACK = 0;                 //we should stop waiting for ack and move on
                     noACKcounter = 0;               //reset counter
 
-                    increaseFuzzer();               //fuzz next thing
+                    if (confirms < NUMBEROFCONFIRMS)
+                    {
+                        confirms = confirms + 1;
+                    }
+                    else
+                    {
+                        confirms = 0;
+                        increaseFuzzer();               //fuzz next thing
+                    }
                     if (DEBUG)
                     {
                         //printf("Frame ACKed, fuzzStep is now %d\n", getFuzzStep());
-                        printf("Frame ACKed, fuzzstep unkown\n");
+                        printf("Frame ACKed\n");
                     }
                     
                 }
@@ -339,6 +340,7 @@ int main(int argc, char *argv[])
             }
             else //waited more than 10 ms for ack. failed
             {
+                //printf("Did not capture an ACK in time\n");
                 noACKcounter = noACKcounter + 1;
                 if (noACKcounter == 20)
                 {
