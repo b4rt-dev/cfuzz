@@ -14,7 +14,7 @@ This is the main file. It handles sending, receiving, but also monitoring of fra
 
 #define DEBUG (0)
 #define SUTTIMEOUTMS (30000) //30s
-#define NUMBEROFCONFIRMS (5)
+#define NUMBEROFCONFIRMS (1) //number of extra confirms after the first confirm before moving on to the next frame
 
 //Used for timing
 struct timeval tm1;
@@ -44,6 +44,10 @@ u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
 //u_char sutMAC[6]            =  "\x9c\xe6\x35\x2a\x69\x16"; //WII U
 //u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
+//u_char sutMAC[6]            = "\xb8\x27\xeb\xf1\x89\x68"; //RPI 3
+//u_char sutMAC[6]            = "\x84\x00\xd2\xe0\x81\xb2"; //Xperia Ray
+//u_char sutMAC[6]            = "\x54\x60\x09\xf8\xbe\x28"; //Chromecast Audio
+//u_char sutMAC[6]            = "\x80\x7d\x3a\x73\x81\xc7"; //Power plug
 
 //Returns filter for libpcap
 //we want to use as many filters here as possible, since libpcap is closer to the hardware than this user-level program
