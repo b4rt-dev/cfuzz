@@ -11,17 +11,18 @@ Manages what to fuzz when.
 #include "fuzzHTCAPAB.h"
 #include "fuzzHTINFO.h"
 #include "fuzzEXTCAPAB.h"
+#include "fuzzEDCA.h"
 #include "fuzzAssResponse.h"
 //CHANGE WHEN NEW SUBFUZZER
 
 //CHANGE WHEN NEW SUBFUZZER
 //Number of subfuzzers
-#define SUBFUZZERS (5)
+#define SUBFUZZERS (6)
 
 //CHANGE WHEN NEW SUBFUZZER
 //Array of pointers to subfuzzers update functions
 int (*p[SUBFUZZERS]) (int i) = {
-    ratesFuzzUpdate, extratesFuzzUpdate, htcapabFuzzUpdate, htinfoFuzzUpdate, extcapabFuzzUpdate};
+    ratesFuzzUpdate, extratesFuzzUpdate, htcapabFuzzUpdate, htinfoFuzzUpdate, extcapabFuzzUpdate, edcaFuzzUpdate};
 
 //State of sub-fuzzer
 //-1 = Done
@@ -35,8 +36,8 @@ int genFuzzState = -1;
 
 //Current sub-fuzzer
 //Starts with -1 to prevent skipping the first sub-fuzzer
-//int subFuzzerIdx = -1;
-int subFuzzerIdx = 99; //to test generic fuzzing part
+int subFuzzerIdx = -1;
+//int subFuzzerIdx = 99; //to test generic fuzzing part
 
 //Flag to indicate if the done with all subfuzzers notification has been sent
 int notifyDone = 0;

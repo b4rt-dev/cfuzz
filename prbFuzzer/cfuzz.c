@@ -36,12 +36,12 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //Is needed to ignore frames from other devices
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
-u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
+//u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
 //u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 //u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
 //u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
-//u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
+u_char sutMAC[6]            =  "\xe0\xe7\x51\x45\x5e\x5d"; //DSI
 //u_char sutMAC[6]            =  "\x9c\xe6\x35\x2a\x69\x16"; //WII U
 //u_char sutMAC[6]            =  "\x6c\xad\xf8\xc8\x77\xca"; //Chromecast 1
 //u_char sutMAC[6]            = "\xb8\x27\xeb\xf1\x89\x68"; //RPI 3

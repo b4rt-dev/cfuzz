@@ -51,6 +51,11 @@ void AssRespPrintCurrentState()
         }
         case 4:
         {
+            printf("Fuzzing static elements\n");
+            break;
+        }
+        case 5:
+        {
             printf("\e[33mDone with fuzzing AssResp\e[39m\n");
             break;
         }

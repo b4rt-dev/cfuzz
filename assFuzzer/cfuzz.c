@@ -37,7 +37,7 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //Comment out the SUT
 //u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
 //u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
-//u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
+u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 //u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
 //u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
@@ -47,7 +47,7 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //u_char sutMAC[6]            = "\xb8\x27\xeb\xf1\x89\x68"; //RPI 3
 //u_char sutMAC[6]            = "\x84\x00\xd2\xe0\x81\xb2"; //Xperia Ray
 //u_char sutMAC[6]            = "\x54\x60\x09\xf8\xbe\x28"; //Chromecast Audio
-u_char sutMAC[6]            = "\x80\x7d\x3a\x73\x81\xc7"; //Power plug
+//u_char sutMAC[6]            = "\x80\x7d\x3a\x73\x81\xc7"; //Power plug
 
 //Returns filter for libpcap
 //we want to use as many filters here as possible, since libpcap is closer to the hardware than this user-level program
@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
                     u_char *packet = createProbeResponse(sourceAddr, &packetSize, radioTapHeader, myMAC);
                     sendPacket(pcap_h, packet, packetSize);
                     free(packet);      //free allocated memory
-                    waitForACK = 3;
+                    waitForACK = 0;
                     startTimer();
                     break;
                 } 
