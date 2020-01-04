@@ -13,6 +13,7 @@ Creates frames.
 #include "fuzzHTCAPAB.h"
 #include "fuzzHTINFO.h"
 #include "fuzzEXTCAPAB.h"
+#include "fuzzEDCA.h"
 #include "fuzzAssResponse.h"
 //CHANGE WHEN NEW SUBFUZZER
 
@@ -109,7 +110,7 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
     if (getNotifyDone() != 0)
         return AssRespFuzz(dstAddress, packetSize, radioTapHeader, myMAC);
 
-    #define numberOfAssInfoElems (5)   //number of information elements
+    #define numberOfAssInfoElems (6)   //number of information elements
 
     //definition of all info elements 
     //CHANGE WHEN NEW SUBFUZZER
@@ -118,11 +119,12 @@ u_char *createAssResponse(u_char *dstAddress, int *packetSize, u_char * radioTap
     infoElem htcapab = htcapabFuzz();
     infoElem htinfo = htinfoFuzz();
     infoElem extcapab = extcapabFuzz();
+    infoElem edca = edcaFuzz();
 
     //CHANGE WHEN NEW SUBFUZZER
     //create array of information elements
     infoElem taggedParams[numberOfAssInfoElems] = {suppRates, extrates, htcapab, 
-        htinfo, extcapab};
+        htinfo, extcapab, edca};
 
     //length of all info elements, including id and len field
     int len_taggedParams = 0;

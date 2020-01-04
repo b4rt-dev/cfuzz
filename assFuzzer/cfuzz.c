@@ -6,6 +6,7 @@ This is the main file. It handles sending, receiving, but also monitoring of fra
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include "cfuzz.h"
 #include "frameCreator.h"
@@ -35,9 +36,9 @@ u_char myMAC[6]            =  "\x00\x0a\xeb\x2d\x72\x55";
 //Mac address of SUT
 //Is needed to ignore frames from other devices
 //Comment out the SUT
-//u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
+u_char sutMAC[6]            =  "\xec\x9b\xf3\x1e\x19\x71"; //Galaxy S6
 //u_char sutMAC[6]            =  "\xcc\xfa\x00\xc9\xfc\xad"; //LG Optimus G
-u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
+//u_char sutMAC[6]            =  "\xd0\x17\x6a\xe8\xe9\x7a"; //Galaxy Ace
 //u_char sutMAC[6]            =  "\x12\x42\x2a\x7e\xd4\xe8"; //Orange Pi Zero
 //u_char sutMAC[6]            =  "\x00\x09\xbf\x7d\x6d\xaa"; //Nintendo DS
 //u_char sutMAC[6]            =  "\x00\x01\x4a\x93\xce\x34"; //PSP
@@ -317,10 +318,24 @@ int main(int argc, char *argv[])
                         //disassociate if specified
                         if (SENDDISASS == 1)
                         {
+                            sleep(1);
                             int packetSize;
                             u_char *packet = createDisAss(sutMAC, &packetSize, radioTapHeader, myMAC);
                             sendPacket(pcap_h, packet, packetSize);
                             free(packet);      //free allocated memory
+                            /*packet = createDisAss(sutMAC, &packetSize, radioTapHeader, myMAC);
+                            sendPacket(pcap_h, packet, packetSize);
+                            free(packet);      //free allocated memory
+                            //sleep(1);
+                            packet = createDisAss(sutMAC, &packetSize, radioTapHeader, myMAC);
+                            sendPacket(pcap_h, packet, packetSize);
+                            free(packet);      //free allocated memory
+                            packet = createDisAss(sutMAC, &packetSize, radioTapHeader, myMAC);
+                            sendPacket(pcap_h, packet, packetSize);
+                            free(packet);      //free allocated memory
+                            packet = createDisAss(sutMAC, &packetSize, radioTapHeader, myMAC);
+                            sendPacket(pcap_h, packet, packetSize);
+                            free(packet);      //free allocated memory*/
                         }
                         increaseFuzzer();               //fuzz next thing
                     }
